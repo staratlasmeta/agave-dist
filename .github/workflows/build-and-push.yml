@@ -70,7 +70,7 @@ jobs:
       - name: Build for production
         run: |
           cd agave/
-          ./scripts/cargo-install-all.sh solana-release/bin
+          ./scripts/cargo-install-all.sh solana-release/
 
       - name: Create release tarball
         run: |
