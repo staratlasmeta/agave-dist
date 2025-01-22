@@ -9,16 +9,18 @@ on:
 jobs:
   build-agave:
     name: Build Agave (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
         include:
           - arch: amd64
             runner: ubuntu-24.04
             target: x86_64-unknown-linux-gnu
+            tarball: solana-release-x86_64-unknown-linux-gnu.tar.bz2
           - arch: arm64
             runner: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
+            tarball: solana-release-aarch64-unknown-linux-gnu.tar.bz2
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - name: Checkout repository
@@ -52,37 +54,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libssl-dev \
-            libudev-dev \
+            build-essential \
             pkg-config \
-            zlib1g-dev \
+            libudev-dev \
             llvm \
-            clang \
-            cmake \
-            make \
-            libprotobuf-dev \
+            libclang-dev \
             protobuf-compiler
 
       - name: Build for production
         run: |
           cd agave
-          RUSTFLAGS="-C target-feature=+crt-static" \
-          cargo build --release --target ${{ matrix.target }} \
-            --features production
+          ./scripts/cargo-install-all.sh .
 
       - name: Create tarball
         run: |
           cd agave
-          mkdir -p release/bin
-          cp target/${{ matrix.target }}/release/solana* release/bin/
-          cp target/${{ matrix.target }}/release/agave* release/bin/
-          tar -cjf "solana-release-${{ matrix.target }}.tar.bz2" -C release .
+          tar cjf ${{ matrix.tarball }} -C bin .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: solana-release-${{ matrix.target }}
-          path: agave/solana-release-${{ matrix.target }}.tar.bz2
+          name: ${{ matrix.tarball }}
+          path: agave/${{ matrix.tarball }}
           if-no-files-found: error
 
   create-release:
@@ -98,7 +91,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            */solana-release-*.tar.bz2
+            */*.tar.bz2
           draft: false
           prerelease: false
         env:
