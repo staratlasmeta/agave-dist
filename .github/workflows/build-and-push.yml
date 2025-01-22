@@ -50,6 +50,12 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
+      - name: Cache Build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "agave -> target"
+          key: ${{ matrix.target }}
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -66,10 +72,18 @@ jobs:
           cd agave
           ./scripts/cargo-install-all.sh .
 
-      - name: Create tarball
+      - name: Create release tarball
         run: |
           cd agave
-          tar cjf ${{ matrix.tarball }} -C bin .
+          mkdir -p solana-release/bin
+          cp bin/* solana-release/bin/
+          # Create version.yml with exact format
+          cat > solana-release/version.yml << EOF
+          channel: ${{ steps.get_ref.outputs.ref }}
+          commit: $(git rev-parse HEAD)
+          target: ${{ matrix.target }}
+          EOF
+          tar cjf ${{ matrix.tarball }} solana-release/
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
