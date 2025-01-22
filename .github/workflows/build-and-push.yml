@@ -69,15 +69,11 @@ jobs:
 
       - name: Build for production
         run: |
-          cd agave
-          ./scripts/cargo-install-all.sh .
+          ./scripts/cargo-install-all.sh agave/solana-release/bin
 
       - name: Create release tarball
         run: |
           cd agave
-          mkdir -p solana-release/bin
-          cp bin/* solana-release/bin/
-          # Create version.yml with exact format
           cat > solana-release/version.yml << EOF
           channel: ${{ steps.get_ref.outputs.ref }}
           commit: $(git rev-parse HEAD)
