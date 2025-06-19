@@ -13,11 +13,11 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-24.04
+            runner: warp-ubuntu-latest-x64-16x
             target: x86_64-unknown-linux-gnu
             tarball: solana-release-x86_64-unknown-linux-gnu.tar.bz2
           - arch: arm64
-            runner: ubuntu-24.04-arm
+            runner: warp-ubuntu-latest-arm64-16x
             target: aarch64-unknown-linux-gnu
             tarball: solana-release-aarch64-unknown-linux-gnu.tar.bz2
     runs-on: ${{ matrix.runner }}
@@ -45,13 +45,12 @@ jobs:
           path: agave
           fetch-depth: 0
 
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: stegaBOB/setup-rust-toolchain@stegaBOB/feat/warpbuild
         with:
-          target: ${{ matrix.target }}
+          cache-provider: "warpbuild"
 
       - name: Cache Build
-        uses: Swatinem/rust-cache@v2
+        uses: stegaBOB/rust-cache@stegaBOB/feat/warpbuild
         with:
           workspaces: "agave -> target"
           key: ${{ matrix.target }}
