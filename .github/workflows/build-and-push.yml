@@ -45,13 +45,14 @@ jobs:
           path: agave
           fetch-depth: 0
 
-      - uses: stegaBOB/setup-rust-toolchain@stegaBOB/feat/warpbuild
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-provider: "warpbuild"
 
       - name: Cache Build
-        uses: stegaBOB/rust-cache@stegaBOB/feat/warpbuild
+        uses: Swatinem/rust-cache@v2
         with:
+          cache-provider: "warpbuild"
           workspaces: "agave -> target"
           key: ${{ matrix.target }}
 
